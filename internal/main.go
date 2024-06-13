@@ -30,6 +30,7 @@ type TransactionRule struct {
 	SetComment       string
 	MatchDescription string
 	MatchPayee       string
+	SetPayee         string
 }
 
 // CsvConfig is the config for parsing the csv file
@@ -52,7 +53,7 @@ type CsvConfig struct {
 // Record represents a financial transaction record
 type Record struct {
 	AccountIn   string // The account in
-	AccountOut  string // The acocunt out
+	AccountOut  string // The account out
 	AmountIn    string // The amount in
 	AmountOut   string // The amount out
 	Comment     string // The comment, if provided
@@ -211,6 +212,7 @@ func getTransactionRule(rule map[string]string) TransactionRule {
 		SetComment:       rule["set_comment"],
 		MatchDescription: rule["match_description"],
 		MatchPayee:       rule["match_payee"],
+		SetPayee:         rule["set_payee"],
 	}
 }
 
@@ -309,6 +311,7 @@ func checkRules(config Config, payee, description string, account, comment *stri
 		if checkRule(config.TransactionsRules[key].MatchPayee, payee) || checkRule(config.TransactionsRules[key].MatchDescription, description) {
 			applyRuleSetting(config.TransactionsRules[key].SetAccount, account)
 			applyRuleSetting(config.TransactionsRules[key].SetComment, comment)
+			applyRuleSetting(config.TransactionsRules[key].SetPayee, &payee)
 		}
 	}
 }

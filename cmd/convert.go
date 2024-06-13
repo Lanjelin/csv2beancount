@@ -3,7 +3,7 @@ package cmd
 import (
 	"os"
 
-	"github.com/cewood/csv2beancount/internal"
+	"github.com/Lanjelin/csv2beancount/internal"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -55,8 +55,9 @@ func init() {
 }
 
 // Typically this is in the root command, but since we don't actually
-//  run the root command, that is have a Run property, then this wouldn't
-//  as expected. So it's been moved here instead.
+//
+//	run the root command, that is have a Run property, then this wouldn't
+//	as expected. So it's been moved here instead.
 //
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {

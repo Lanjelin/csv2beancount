@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/cewood/csv2beancount/cmd"
+	"github.com/Lanjelin/csv2beancount/cmd"
 )
 
 func main() {
