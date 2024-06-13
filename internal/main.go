@@ -30,6 +30,7 @@ type TransactionRule struct {
 	SetComment       string
 	MatchDescription string
 	MatchPayee       string
+	SetDescription   string
 	SetPayee         string
 }
 
@@ -212,6 +213,7 @@ func getTransactionRule(rule map[string]string) TransactionRule {
 		SetComment:       rule["set_comment"],
 		MatchDescription: rule["match_description"],
 		MatchPayee:       rule["match_payee"],
+		SetDescription:   rule["set_description"],
 		SetPayee:         rule["set_payee"],
 	}
 }
@@ -273,7 +275,7 @@ func formatRecord(record []string, config Config) Record {
 		accountOut = config.Csv.ProcessingAccount
 		accountIn = config.Csv.DefaultAccount
 
-		checkRules(config, &payee, description, &accountIn, &comment)
+		checkRules(config, &payee, &description, &accountIn, &comment)
 	} else {
 		// it's a credit
 		amountIn = amount
@@ -281,7 +283,7 @@ func formatRecord(record []string, config Config) Record {
 		accountIn = config.Csv.ProcessingAccount
 		accountOut = config.Csv.DefaultAccount
 
-		checkRules(config, &payee, description, &accountOut, &comment)
+		checkRules(config, &payee, &description, &accountOut, &comment)
 	}
 
 	return Record{
@@ -299,7 +301,7 @@ func formatRecord(record []string, config Config) Record {
 }
 
 // checkRules ...
-func checkRules(config Config, payee *string, description string, account, comment *string) {
+func checkRules(config Config, payee *string, description *string, account, comment *string) {
 	for key := range config.TransactionsRules {
 		log.WithFields(log.Fields{
 			"description": description,
@@ -308,9 +310,10 @@ func checkRules(config Config, payee *string, description string, account, comme
 			"rule":        fmt.Sprintf("%#v", config.TransactionsRules[key]),
 		}).Debug("iterating over rules")
 
-		if checkRule(config.TransactionsRules[key].MatchPayee, *payee) || checkRule(config.TransactionsRules[key].MatchDescription, description) {
+		if checkRule(config.TransactionsRules[key].MatchPayee, *payee) || checkRule(config.TransactionsRules[key].MatchDescription, *description) {
 			applyRuleSetting(config.TransactionsRules[key].SetAccount, account)
 			applyRuleSetting(config.TransactionsRules[key].SetComment, comment)
+			applyRuleSetting(config.TransactionsRules[key].SetDescription, description)
 			applyRuleSetting(config.TransactionsRules[key].SetPayee, payee)
 		}
 	}
