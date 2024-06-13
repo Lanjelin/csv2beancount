@@ -260,7 +260,11 @@ func formatRecord(record []string, config Config) Record {
 		if record[config.Csv.AmountIn] != "" {
 			amount = formatAmount(record[config.Csv.AmountIn])
 		} else if record[config.Csv.AmountOut] != "" {
-			amount = fmt.Sprintf("-%s", record[config.Csv.AmountOut])
+			// amount = fmt.Sprintf("-%s", record[config.Csv.AmountOut])
+			amount = formatAmount(record[config.Csv.AmountOut])
+			if !strings.Contains(amount, "-") {
+				amount = fmt.Sprintf("-%s", amount)
+			}
 		}
 	} else if config.Csv.AmountIn == config.Csv.AmountOut {
 		// single amount field with signs to indicate transaction type
