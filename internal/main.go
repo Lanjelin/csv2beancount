@@ -311,7 +311,7 @@ func checkRules(config Config, payee, description string, account, comment *stri
 		if checkRule(config.TransactionsRules[key].MatchPayee, payee) || checkRule(config.TransactionsRules[key].MatchDescription, description) {
 			applyRuleSetting(config.TransactionsRules[key].SetAccount, account)
 			applyRuleSetting(config.TransactionsRules[key].SetComment, comment)
-			applyRuleSetting(config.TransactionsRules[key].SetPayee, &payee)
+			applyRuleSetting2(config.TransactionsRules[key].SetPayee, payee)
 		}
 	}
 }
@@ -320,6 +320,13 @@ func checkRules(config Config, payee, description string, account, comment *stri
 func applyRuleSetting(setting string, value *string) {
 	if setting != "" {
 		*value = setting
+	}
+}
+
+// applyRuleSetting ...
+func applyRuleSetting2(setting string, value string) {
+	if setting != "" {
+		value = setting
 	}
 }
 
