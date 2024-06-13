@@ -1,4 +1,4 @@
-module github.com/cewood/csv2beancount
+module github.com/Lanjelin/csv2beancount
 
 go 1.14
 
