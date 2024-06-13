@@ -273,7 +273,7 @@ func formatRecord(record []string, config Config) Record {
 		accountOut = config.Csv.ProcessingAccount
 		accountIn = config.Csv.DefaultAccount
 
-		checkRules(config, payee, description, &accountIn, &comment)
+		checkRules(config, &payee, description, &accountIn, &comment)
 	} else {
 		// it's a credit
 		amountIn = amount
@@ -281,7 +281,7 @@ func formatRecord(record []string, config Config) Record {
 		accountIn = config.Csv.ProcessingAccount
 		accountOut = config.Csv.DefaultAccount
 
-		checkRules(config, payee, description, &accountOut, &comment)
+		checkRules(config, &payee, description, &accountOut, &comment)
 	}
 
 	return Record{
@@ -299,7 +299,7 @@ func formatRecord(record []string, config Config) Record {
 }
 
 // checkRules ...
-func checkRules(config Config, payee, description string, account, comment *string) {
+func checkRules(config Config, payee *string, description string, account, comment *string) {
 	for key := range config.TransactionsRules {
 		log.WithFields(log.Fields{
 			"description": description,
@@ -308,10 +308,10 @@ func checkRules(config Config, payee, description string, account, comment *stri
 			"rule":        fmt.Sprintf("%#v", config.TransactionsRules[key]),
 		}).Debug("iterating over rules")
 
-		if checkRule(config.TransactionsRules[key].MatchPayee, payee) || checkRule(config.TransactionsRules[key].MatchDescription, description) {
+		if checkRule(config.TransactionsRules[key].MatchPayee, *payee) || checkRule(config.TransactionsRules[key].MatchDescription, description) {
 			applyRuleSetting(config.TransactionsRules[key].SetAccount, account)
 			applyRuleSetting(config.TransactionsRules[key].SetComment, comment)
-			applyRuleSetting2(config.TransactionsRules[key].SetPayee, payee)
+			applyRuleSetting(config.TransactionsRules[key].SetPayee, payee)
 		}
 	}
 }
@@ -320,13 +320,6 @@ func checkRules(config Config, payee, description string, account, comment *stri
 func applyRuleSetting(setting string, value *string) {
 	if setting != "" {
 		*value = setting
-	}
-}
-
-// applyRuleSetting ...
-func applyRuleSetting2(setting string, value string) {
-	if setting != "" {
-		value = setting
 	}
 }
 
