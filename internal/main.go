@@ -67,7 +67,7 @@ type Record struct {
 
 // RecordTemplate is the default template for formatting records
 const RecordTemplate = `;; {{ .Raw }}
-{{.Date}} * {{printf "%q" .Payee}} {{printf "%q" .Description}}    {{.Comment}}
+{{.Date}} * {{printf "%q" .Payee}} {{printf "%q" .Description}}{{if .Comment}}    ;; {{.Comment}}{{end}}
   {{.AccountOut}}  {{.AmountOut}} {{.Currency}}
   {{.AccountIn}}   {{.AmountIn}} {{.Currency}}
 
@@ -289,10 +289,7 @@ func formatRecord(record []string, config Config) Record {
 
 		checkRules(config, &payee, &description, &accountOut, &comment)
 	}
-	// Prepend comment signs if comment exists
-	if comment != "" {
-		comment = fmt.Sprintf(";; %s", comment)
-	}
+
 	return Record{
 		AccountIn:   accountIn,
 		AccountOut:  accountOut,
