@@ -32,6 +32,7 @@ type TransactionRule struct {
 	MatchPayee       string
 	SetDescription   string
 	SetPayee         string
+	SetTags          string
 }
 
 // CsvConfig is the config for parsing the csv file
@@ -61,13 +62,14 @@ type Record struct {
 	Currency    string // The currency
 	Date        string // The date
 	Description string // The description, if present
+	Tags        string // The tags, if present
 	Payee       string // The payee
 	Raw         string // The raw csv record
 }
 
 // RecordTemplate is the default template for formatting records
 const RecordTemplate = `;; {{ .Raw }}{{if .Comment}}{{printf "\n;; %s" .Comment}}{{end}}
-{{.Date}} * {{printf "%q" .Payee}} {{printf "%q" .Description}}
+{{.Date}} * {{printf "%q" .Payee}} {{printf "%q" .Description}}{{if .Tags}} {{.Tags}}{{end}}
   {{.AccountOut}}  {{.AmountOut}} {{.Currency}}
   {{.AccountIn}}   {{.AmountIn}} {{.Currency}}
 
@@ -215,6 +217,7 @@ func getTransactionRule(rule map[string]string) TransactionRule {
 		MatchPayee:       rule["match_payee"],
 		SetDescription:   rule["set_description"],
 		SetPayee:         rule["set_payee"],
+		SetTags:          rule["set_tags"],
 	}
 }
 
@@ -235,7 +238,7 @@ func parseCsvRecord(record []string, config Config, tplString string, output io.
 
 // formatRecord ...
 func formatRecord(record []string, config Config) Record {
-	var accountIn, accountOut, amountIn, amountOut, comment, currency, date, description, payee, raw string
+	var accountIn, accountOut, amountIn, amountOut, comment, currency, date, description, tags, payee, raw string
 
 	t, err := time.Parse(config.Csv.DateLayoutIn, record[config.Csv.Date])
 	if err != nil {
@@ -279,7 +282,7 @@ func formatRecord(record []string, config Config) Record {
 		accountOut = config.Csv.ProcessingAccount
 		accountIn = config.Csv.DefaultAccount
 
-		checkRules(config, &payee, &description, &accountIn, &comment)
+		checkRules(config, &payee, &description, &tags, &accountIn, &comment)
 	} else {
 		// it's a credit
 		amountIn = amount
@@ -287,7 +290,7 @@ func formatRecord(record []string, config Config) Record {
 		accountIn = config.Csv.ProcessingAccount
 		accountOut = config.Csv.DefaultAccount
 
-		checkRules(config, &payee, &description, &accountOut, &comment)
+		checkRules(config, &payee, &description, &tags, &accountOut, &comment)
 	}
 
 	return Record{
@@ -299,13 +302,14 @@ func formatRecord(record []string, config Config) Record {
 		Currency:    currency,
 		Date:        date,
 		Description: description,
+		Tags:        tags,
 		Payee:       payee,
 		Raw:         raw,
 	}
 }
 
 // checkRules ...
-func checkRules(config Config, payee *string, description *string, account, comment *string) {
+func checkRules(config Config, payee *string, description *string, tags *string, account, comment *string) {
 	for key := range config.TransactionsRules {
 		log.WithFields(log.Fields{
 			"description": description,
@@ -318,6 +322,7 @@ func checkRules(config Config, payee *string, description *string, account, comm
 			applyRuleSetting(config.TransactionsRules[key].SetAccount, account)
 			applyRuleSetting(config.TransactionsRules[key].SetComment, comment)
 			applyRuleSetting(config.TransactionsRules[key].SetDescription, description)
+			applyRuleSetting(config.TransactionsRules[key].SetTags, tags)
 			applyRuleSetting(config.TransactionsRules[key].SetPayee, payee)
 		}
 	}
